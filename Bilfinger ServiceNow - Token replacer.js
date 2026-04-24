@@ -7,35 +7,43 @@
     const debounceMap = new WeakMap();
 
     const EXPLICIT_TOKENS = {
-        'caller': [
-            'input[name="u_caller_input"]',
-            'input[name="u_caller"]',
-            'input[aria-label="Caller"]'
+        /*ALL*/
+        'first name': [ // Get the first name of "affected person" (INC) / "requested for" (requested for) depending on ticket type. 
+            'input[name="first_name_input"]',
+            'input[name="first_name"]',
+            'input[aria-label="First name. This field supports 100 or fewer characters.""]'
         ],
-        'affected person': [
-            'input[name="caller_id_input"]',
-            'input[name="caller_id"]',
-            'input[aria-label="Affected person"]'
-        ],
-        'requested for': [
-            'input[name="requested_for_input"]',
-            'input[name="requested_for"]',
-            'input[aria-label="Requested for"]'
-        ],
-        'opened by': [
-            'input[name="opened_by_input"]',
-            'input[name="opened_by"]',
-            'input[aria-label="Opened by"]'
+        'assignment group': [
+            'input[name="assigned_to_input"]',
+            'input[name="assigned_to"]',
+            'input[aria-label="Assigned to"]'
         ],
         'assigned to': [
             'input[name="assigned_to_input"]',
             'input[name="assigned_to"]',
             'input[aria-label="Assigned to"]'
-        ]
+        ],
+        /*INC*/
+        'affected person': [
+            'input[name="caller_id_input"]',
+            'input[name="caller_id"]',
+            'input[aria-label="Affected person"]'
+        ],
+        'caller': [
+            'input[name="u_caller_input"]',
+            'input[name="u_caller"]',
+            'input[aria-label="Caller"]'
+        ],
+        /*RITM / SCTASK*/
+        'requested for': [
+            'input[name="requested_for_input"]',
+            'input[name="requested_for"]',
+            'input[aria-label="Requested for"]'
+        ],
     };
 
     const BLOCKED_TOKENS = new Set([
-        // 'caller'
+        'code','/code'
     ]);
 
     function log(...args) {
