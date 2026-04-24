@@ -8,15 +8,10 @@
 
     const EXPLICIT_TOKENS = {
         /*ALL*/
-        'first name': [ // Get the first name of "affected person" (INC) / "requested for" (RITM) depending on ticket type. 
-            'input[name="first_name_input"]',
-            'input[name="first_name"]',
-            'input[aria-label="First name. This field supports 100 or fewer characters.""]'
-        ],
         'assignment group': [
-            'input[name="assigned_to_input"]',
-            'input[name="assigned_to"]',
-            'input[aria-label="Assigned to"]'
+            'input[name="assignment_group_input"]',
+            'input[name="assignment_group"]',
+            'input[aria-label="Assignment group"]'
         ],
         'assigned to': [
             'input[name="assigned_to_input"]',
