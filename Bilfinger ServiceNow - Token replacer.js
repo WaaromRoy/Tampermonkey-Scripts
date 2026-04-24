@@ -8,7 +8,7 @@
 
     const EXPLICIT_TOKENS = {
         /*ALL*/
-        'first name': [ // Get the first name of "affected person" (INC) / "requested for" (requested for) depending on ticket type. 
+        'first name': [ // Get the first name of "affected person" (INC) / "requested for" (RITM) depending on ticket type. 
             'input[name="first_name_input"]',
             'input[name="first_name"]',
             'input[aria-label="First name. This field supports 100 or fewer characters.""]'
