@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    const DEBUG = true;
+    const DEBUG = false;
     const PREFIX = '[Token Replacer]';
     const debounceMap = new WeakMap();
 
