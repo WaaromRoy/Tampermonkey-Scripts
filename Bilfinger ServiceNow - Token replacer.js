@@ -304,6 +304,8 @@
 
     function resolveTokenValue(tokenName, contextEl) {
         const key = normalizeText(tokenName);
+        if (BLOCKED_TOKENS.has(key)) return null;
+        
         const searchRoots = getLocalRoots(contextEl);
 
         if (EXPLICIT_TOKENS[key]) {
@@ -334,6 +336,8 @@
             if (BLOCKED_TOKENS.has(normalizeText(tokenName))) continue;
 
             const value = resolveTokenValue(tokenName, contextEl);
+            if (value === null) continue;
+            
             const regex = new RegExp(`\\[${escapeRegex(tokenName)}\\]`, 'gi');
 
             if (!regex.test(updated)) continue;
