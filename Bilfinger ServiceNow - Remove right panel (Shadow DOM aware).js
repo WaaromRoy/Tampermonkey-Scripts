@@ -15,6 +15,7 @@
   function obliterate(node) {
     try { node.remove(); }
     catch {
+        console.warn(`Unable to obliterate node, trying to hide it instead.`);
       node.style.setProperty('display', 'none', 'important');
       node.style.setProperty('visibility', 'hidden', 'important');
       node.style.setProperty('width', '0', 'important');

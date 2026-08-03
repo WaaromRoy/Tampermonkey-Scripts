@@ -48,6 +48,9 @@
     function warn(...args) {
         console.warn(PREFIX, ...args);
     }
+    function error(...args) {
+        console.error(PREFIX, ...args);
+    }
     // </editor-fold>
     function normalizeText(text) {
         return (text || '').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -111,9 +114,7 @@
         function walk(currentRoot) {
             if (!currentRoot || seen.has(currentRoot)) return;
             seen.add(currentRoot);
-
             if (!currentRoot.querySelectorAll) return;
-
             try {
                 results.push(...currentRoot.querySelectorAll(selector));
             } catch {}
@@ -122,7 +123,6 @@
             try {
                 all = currentRoot.querySelectorAll('*');
             } catch {}
-
             for (const el of all) {
                 if (el.shadowRoot) walk(el.shadowRoot);
             }
@@ -341,6 +341,7 @@
                 debounceProcess(el);
         }
     }
+    // <editor-fold desc="Input Event Listeners">
     EventsToListenFor.forEach((event) => {
         log("Adding listener for: " + event)
         document.addEventListener(event,handleEditableEvent, true)
