@@ -1,3 +1,5 @@
+// noinspection DuplicatedCode,SpellCheckingInspection
+
 (function () {
     'use strict';
     // <editor-fold desc="Variables">
@@ -43,13 +45,13 @@
     // </editor-fold>
     // <editor-fold desc="Console">
     function log(...args) {
-        if (DEBUG) console.log(PREFIX, ...args);
+        if (DEBUG) console.log(PREFIX,`[${new Date().toLocaleTimeString()}]`, ...args);
     }
     function warn(...args) {
-        console.warn(PREFIX, ...args);
+        console.warn(PREFIX,`[${new Date().toLocaleTimeString()}]`, ...args);
     }
     function error(...args) {
-        console.error(PREFIX, ...args);
+        console.error(PREFIX,`[${new Date().toLocaleTimeString()}]`, ...args);
     }
     // </editor-fold>
     function normalizeText(text) {
@@ -218,7 +220,6 @@
                 seen.add(rootNode);
                 roots.push(rootNode);
             }
-
             if (current instanceof ShadowRoot) {
                 current = current.host || null;
             } else {
@@ -230,10 +231,13 @@
             roots.push(document);
         }
         const searchRoots = roots;
-
         if (EXPLICIT_TOKENS[key]) {
             const explicitValue = getValueBySelectors(EXPLICIT_TOKENS[key], searchRoots);
             if (explicitValue) return explicitValue;
+        }
+        if (key.includes('|http')) {
+            const [text, link] = tokenName.split('|');
+            if (text && link) return `[code]<a href="${link}" target="_blank">🔗${text}</a>[/code]`;
         }
         const normalized = normalizeText(tokenName)
             .replace(/[^a-z0-9]+/g, '_')
@@ -263,8 +267,6 @@
         const tokenNames = [...new Set((text.match(/\[([^\]]+)]/g) || []).map(match => match.slice(1, -1).trim()))];
 
         for (const tokenName of tokenNames) {
-            if (BLOCKED_TOKENS.has(normalizeText(tokenName))) continue;
-
             const value = resolveTokenValue(tokenName, contextEl);
             if (value === null) continue;
 
@@ -308,7 +310,7 @@
             el.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
             el.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
             el.dataset.tmReplacing = '0';
-            log('Replaced token text');
+            log('Replaced token');
         }
 
         for (const tokenName of unresolved) {

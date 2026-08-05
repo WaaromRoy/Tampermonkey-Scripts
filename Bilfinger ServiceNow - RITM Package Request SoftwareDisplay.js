@@ -1,4 +1,6 @@
-﻿(function () {
+﻿// noinspection DuplicatedCode
+
+(function () {
     'use strict';
     // <editor-fold desc="Variables">
     const DEBUG = true;
@@ -246,6 +248,7 @@
         }
     }
     // <editor-fold desc="Input Event Listeners">
+    // Only needed to initialize, is replaced by observer ASAP
     InitialEvents.forEach(event => {
         log('Adding listener for:', event);
 
@@ -264,7 +267,6 @@
         scheduleOverlayUpdate,
         { passive: true }
     );
-
     log('Listeners attached once on document');
     // </editor-fold>
 })();
