@@ -4,19 +4,22 @@
     const DEBUG = true;
     const PREFIX = '[SoftwareDisplay]';
     const SELECTORS = ['.row'];
-    const EventsToListenFor = ['click']
+    const InitialEvents = ['click']
     let overlayTrackingFrame = null;
     let overlayUpdateScheduled = false;
+    let rowObserver = null;
+    let observedRowRoot = null;
+    let rowUpdateTimer = null;
     // </editor-fold>
     // <editor-fold desc="Console">
     function log(...args) {
-        if (DEBUG) console.log(PREFIX, ...args);
+        if (DEBUG) console.log(PREFIX,`[${new Date().toLocaleTimeString()}]`, ...args);
     }
     function warn(...args) {
-        console.warn(PREFIX, ...args);
+        console.warn(PREFIX,`[${new Date().toLocaleTimeString()}]`, ...args);
     }
     function error(...args) {
-        console.error(PREFIX, ...args);
+        console.error(PREFIX,`[${new Date().toLocaleTimeString()}]`, ...args);
     }
     // </editor-fold>
     function queryAllDeep(selectors, root = document) {
@@ -71,14 +74,12 @@
                 overlay.style.minHeight = `${textRect.height}px`;
             });
     }
-
     function scheduleOverlayUpdate() {
         if (overlayUpdateScheduled) return;
 
         overlayUpdateScheduled = true;
         requestAnimationFrame(updateOverlayPositions);
     }
-
     function startOverlayTracking() {
         if (overlayTrackingFrame !== null) return;
 
@@ -98,14 +99,12 @@
 
         overlayTrackingFrame = requestAnimationFrame(track);
     }
-
     function stopOverlayTracking() {
         if (overlayTrackingFrame === null) return;
 
         cancelAnimationFrame(overlayTrackingFrame);
         overlayTrackingFrame = null;
     }
-
     function editRow(row) {
         if (!row?.isConnected) return;
 
@@ -139,7 +138,7 @@
             left: `${textRect.left}px`,
             top: `${textRect.top}px`,
             width: `${Math.max(textRect.width, cellRect.right - textRect.left)}px`,
-            minHeight: `${textRect.height}px`,
+            minHeight: `${textRect.minHeight}px`,
 
             zIndex: '2147483647',
             pointerEvents: 'none',
@@ -154,7 +153,8 @@
             letterSpacing: originalStyle.letterSpacing,
             textAlign: originalStyle.textAlign,
             whiteSpace: 'normal',
-            overflowWrap: 'anywhere'
+            overflowWrap: 'anywhere',
+            alignItems: 'center'
         });
 
         overlay._softwareDisplaySource = original;
@@ -192,10 +192,40 @@
 
         stopOverlayTracking();
     }
+    function AddObserver(rows){
+        rows.forEach(row => {
+            const root = row.getRootNode()
+            if (!(root instanceof ShadowRoot)|| observedRowRoot === root)
+                return;
+
+            observedRowRoot = root;
+            rowObserver = new MutationObserver(() => {
+                clearTimeout(rowUpdateTimer);
+
+                // Allow ServiceNow to finish the current render.
+                rowUpdateTimer = setTimeout(() => {
+                    log('Rows changed inside the shadow root');
+                    observeRoot(root);
+                }, 50);
+            });
+
+            rowObserver.observe(root, {
+                childList: true,
+                subtree: true
+            });
+            log('Row observer attached to:', root);
+
+            InitialEvents.forEach((event) => {
+                document.removeEventListener(event, observeRoot, true);
+            })
+
+            log('Temporary listeners removed');
+        });
+    }
     function observeRoot(root = document) {
         clearSoftwareDisplays();
-
         const rows = queryAllDeep(SELECTORS, root);
+        AddObserver(rows);
         const pathParts = window.location.pathname.split('/');
         if (pathParts[pathParts.length - 1] === 'home') {
             rows.forEach(row => {
@@ -215,9 +245,8 @@
             }
         }
     }
-
     // <editor-fold desc="Input Event Listeners">
-    EventsToListenFor.forEach(event => {
+    InitialEvents.forEach(event => {
         log('Adding listener for:', event);
 
         document.addEventListener(event, () => {
