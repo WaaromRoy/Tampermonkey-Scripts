@@ -75,15 +75,18 @@
         /*LIST*/{
             matches: token => /\|l(?:ist)?$/i.test(token),
             execute: token => {
-                const points = token.replace(/\|(?:ist)?$/i, '').split('|');
-                let returnString = ""
-                points.foreach(point => {
+                const points = token.replace(/\|l(?:ist)?$/i, '').split('|').map(point => point.trim()).filter(Boolean);
+
+                let returnString = '';
+
+                points.forEach(point => {
                     returnString += `<li>${point}</li>`;
-                })
+                });
+
                 return `[code]<ul>${returnString}</ul>[/code]`;
             }
         },
-        /*VODAFONE*/ /*makes a table from the provided info copied from vodafone*/{
+        /*VODAFONE*/{/*makes a table from the provided info copied from vodafone*/
             matches: token => /\|vodafone$/i.test(token),
             execute: token => {
                 const tablevalues = token.trimStart()
