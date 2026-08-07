@@ -47,33 +47,62 @@
         /*LINK*/{
             matches: token => token.includes('|http') &&
                 !/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(token) && !/^(img|image)\|http/i.test(token),
-
             execute: token => {
                 const [text, link] = token.split('|');
-
                 return `$[code]<a href="${link}" target="_blank">🔗${text}</a>[/code]`;
             }
         },
         /*IMAGE*/{
             matches: token => (token.includes('|http')&& /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(token) ||
-                /^(img|image)\|http/i.test(token)
-            ),
-
+                /^(img|image)\|http/i.test(token)),
             execute: token => {
                 const [text, image] = token.split('|');
-
                 return `[code]<img src="${image}" alt="${text}">[/code]`;
             }
         },
         /*BOLD*/{
-            matches: token => token.endsWith('|bold'),
-
+            matches: token => /\|b(?:old)?$/i.test(token),
+            execute: token => `[code]<strong>${token.replace(/\|b(?:old)?$/i, '').trim()}</strong>[/code]`
+        },
+        /*ITALIC*/{
+            matches: token => /\|i(?:talic)?$/i.test(token),
+            execute: token => `[code]<em>${token.replace(/\|i(?:talic)?$/i,'').trim()}</em>[/code]`
+        },
+        /*UNDERLINE*/{
+            matches: token => /\|u(?:nderline)?$/i.test(token),
+            execute: token => `[code]<u>${token.replace(/\|u(?:nderline)?$/i).trim()}</u>[/code]`
+        },
+        /*LIST*/{
+            matches: token => /\|l(?:ist)?$/i.test(token),
             execute: token => {
-                const text = token.slice(0, -'|bold'.length);
-
-                return `[code]<strong>${text}</strong>[/code]`;
+                const points = token.replace(/\|(?:ist)?$/i, '').split('|');
+                let returnString = ""
+                points.foreach(point => {
+                    returnString += `<li>${point}</li>`;
+                })
+                return `[code]<ul>${returnString}</ul>[/code]`;
             }
         },
+        /*VODAFONE*/ /*makes a table from the provided info copied from vodafone*/{
+            matches: token => /\|vodafone$/i.test(token),
+            execute: token => {
+                const tablevalues = token.trimStart()
+                    .replace(/^e-mail\nshop\nvouchercode\twaarde\tstatus\tcreatie­datum \topmerkingen\n/, '')
+                    .replace(/\|vodafone$/i, '').split(/(?:\r?\n|\t)+/);
+                let count = 0;
+                let returnString = "";
+                tablevalues.forEach((tablevalue, index) => {
+                    returnString += `<td>${tablevalue.trim()}</td>`;
+                    count ++;
+                    if (count === 7 && tablevalues.length !== index) {
+                        returnString += '</tr><tr>';
+                        count = 0;
+                    }
+                });
+                const headerline = `<tr><th>E-Mail</th><th>Shop</th><th>Vouchercode</th><th>Waarde</th><th>Status</th><th>Creatiedatum</th><th>Opmerkingen</th></tr>`;
+                return `[code]<table>${headerline}<tr>${returnString}</tr></table>[/code]`;
+            }
+        }
     ];
     // </editor-fold>
     // <editor-fold desc="Console">
@@ -367,7 +396,6 @@
 
         debounceMap.set(el, timer);
     }
-    // <editor-fold desc="Input Events">
     function handleEditableEvent(event) {
         const el = (event.composedPath ? event.composedPath() : [event.target])
             .find(node => node instanceof Element && isEditable(node)) || null;
