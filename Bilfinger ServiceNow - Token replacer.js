@@ -42,6 +42,39 @@
         'code','/code'
     ]);
     const EventsToListenFor = ['input','blur','paste','click']
+
+    const tokenHandlers = [
+        /*LINK*/{
+            matches: token => token.includes('|http') &&
+                !/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(token) && !/^(img|image)\|http/i.test(token),
+
+            execute: token => {
+                const [text, link] = token.split('|');
+
+                return `$[code]<a href="${link}" target="_blank">🔗${text}</a>[/code]`;
+            }
+        },
+        /*IMAGE*/{
+            matches: token => (token.includes('|http')&& /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(token) ||
+                /^(img|image)\|http/i.test(token)
+            ),
+
+            execute: token => {
+                const [text, image] = token.split('|');
+
+                return `[code]<img src="${image}" alt="${text}">[/code]`;
+            }
+        },
+        /*BOLD*/{
+            matches: token => token.endsWith('|bold'),
+
+            execute: token => {
+                const text = token.slice(0, -'|bold'.length);
+
+                return `[code]<strong>${text}</strong>[/code]`;
+            }
+        },
+    ];
     // </editor-fold>
     // <editor-fold desc="Console">
     function log(...args) {
@@ -207,6 +240,12 @@
 
         return '';
     }
+    function executeSpecialToken(tokenName) {
+        const handler = tokenHandlers.find(item =>
+            item.matches(tokenName.toLowerCase())
+        );
+        return !handler ? null : handler.execute(tokenName);
+    }
     function resolveTokenValue(tokenName, contextEl) {
         const key = normalizeText(tokenName);
         if (BLOCKED_TOKENS.has(key)) return null;
@@ -235,10 +274,10 @@
             const explicitValue = getValueBySelectors(EXPLICIT_TOKENS[key], searchRoots);
             if (explicitValue) return explicitValue;
         }
-        if (key.includes('|http')) {
-            const [text, link] = tokenName.split('|');
-            if (text && link) return `[code]<a href="${link}" target="_blank">🔗${text}</a>[/code]`;
-        }
+
+        const specialResult = executeSpecialToken(tokenName);
+        if (specialResult !== null) return specialResult;
+
         const normalized = normalizeText(tokenName)
             .replace(/[^a-z0-9]+/g, '_')
             .replace(/^_+|_+$/g, '');
