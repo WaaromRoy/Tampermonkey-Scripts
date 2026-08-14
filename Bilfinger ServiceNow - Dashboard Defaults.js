@@ -1,7 +1,25 @@
-﻿(function () {
-    'use strict';
+﻿// noinspection DuplicatedCode,SpellCheckingInspection
 
+(function () {
+    'use strict';
+    const DEBUG = true;
+    const PREFIX = '[Dashboard Defaults]';
+    // <editor-fold desc="Console">
+    function log(...args) {
+        if (DEBUG) console.log(PREFIX,`[${new Date().toLocaleTimeString()}]`, ...args);
+    }
+    function warn(...args) {
+        console.warn(PREFIX,`[${new Date().toLocaleTimeString()}]`, ...args);
+    }
+    function error(...args) {
+        console.error(PREFIX,`[${new Date().toLocaleTimeString()}]`, ...args);
+    }
+    // </editor-fold>
     window.startDashboardDefaults = function (dashboardSysId) {
+        if (dashboardSysId.toLowerCase() === 'default') {
+            dashboardSysId = '831ebe9fc3e28f100e1990dd2b01318d';
+        }
+        log('Using dashboard:', dashboardSysId);
         const handledStores = new WeakSet();
         let changingLimit = false;
         function queryDeep(selector, root = document) {
@@ -33,7 +51,6 @@
                 return;
             }
             handledStores.add(store);
-            if (dashboardSysId === 'default') dashboardSysId = '831ebe9fc3e28f100e1990dd2b01318d';
             store.dispatch(
                 'DASHBOARD_DESIGNER#GET_PAR_DASHBOARD_DETAILS',
                 {
