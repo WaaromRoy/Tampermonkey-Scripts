@@ -201,7 +201,8 @@
     function getValueBySelectors(selectors, searchRoots) {
         for (const root of searchRoots) {
             for (const selector of selectors) {
-                const el = queryAllDeep(selector, root).length ? results[0] : null;
+                const results = queryAllDeep(selector, root);
+                const el = results.length ? results[0] : null;
                 if (el) {
                     const value = getValueFromElement(el);
                     if (value) {
